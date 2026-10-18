@@ -1,13 +1,14 @@
 ---
-date: 2026-10-16
+date: 2026-10-16 08:30:00 +03:00
 categories:
   - ci-cd
 tags:
+  - docker
   - github-actions
   - mkdocs
 ---
 
-# Wiring MkDocs to GitHub Pages with strict builds
+# Containerizing MkDocs and wiring strict CI/CD
 
 The docs site was already deploying. The problem was *how* it was deploying.
 
@@ -36,20 +37,28 @@ repo. No `gh-pages` branch.
 Dependencies are pinned in `requirements.txt`. `pip install -r
 requirements.txt` installs the same versions on every machine, every run.
 
-## What broke along the way
+## Containerizing the dev environment
 
-Two things worth remembering:
+To ensure the site runs identically on any machine, I containerized the local
+development environment using Docker. 
+
+Building the Docker image initially hit a snag: I used the `python:3.12-slim`
+base image, which is great for keeping the image small, but it strips out
+non-essential tools — including `git`. Because the RSS plugin relies on
+`GitPython`, the build crashed. The fix was adding `RUN apt-get install -y git`
+to the Dockerfile.
+
+By using Docker Compose with bind mounts, live-reload works perfectly. You edit
+a Markdown file on the host machine, and the container sees the change
+instantly, triggering a rebuild without ever installing Python on the host.
+
+## What broke along the way
 
 The home page was named `00-index.md`. MkDocs maps filenames to URLs almost
 literally, so that became `/infra-lab/00-index/` instead of `/infra-lab/`.
 Renaming it to `index.md` fixed the root URL. The `00-` prefix was a leftover
 from an ordering trick that MkDocs doesn't actually need — nav order comes
 from the `nav:` list, not the filename.
-
-Switching from branch deploys to artifact deploys requires flipping the Pages
-source in repo settings from "Deploy from a branch" to "GitHub Actions". The
-workflow can run green and the site can still serve the old branch if that
-setting is missed. Green CI does not mean the change is live.
 
 ## Why this matters beyond one repo
 

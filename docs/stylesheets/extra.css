@@ -1,0 +1,27 @@
+/* Deep violet/blue checkered grid background */
+body {
+    background-color: #0B0914; /* Very dark indigo/violet base */
+    background-image: 
+        linear-gradient(rgba(139, 92, 246, 0.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(139, 92, 246, 0.07) 1px, transparent 1px);
+    background-size: 30px 30px;
+    background-position: center center;
+}
+
+/* Make the main content container slightly translucent so the grid shows through */
+.md-container {
+    background-color: rgba(11, 9, 20, 0.85);
+}
+
+/* Ensure the sidebar and header stay transparent */
+.md-sidebar, .md-header {
+    background-color: transparent !important;
+}
+
+/* Give the text area a subtle violet-tinted dark background and border */
+.md-content {
+    background-color: rgba(20, 16, 35, 0.9);
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid rgba(139, 92, 246, 0.2);
+}

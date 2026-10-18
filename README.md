@@ -12,9 +12,10 @@ systems and infrastructure engineering.
 | ----------------- | ---------------------------- |
 | Docs framework    | MkDocs Material 9.7.0        |
 | Language (docs)   | Python 3.12                  |
+| Containerization  | Docker & Docker Compose      |
 | CI/CD             | GitHub Actions               |
 | Hosting           | GitHub Pages                 |
-| Local development | WSL 2 (Ubuntu) on Windows 11 |
+| Environment       | Native Linux (Ubuntu)        |
 
 ## 📁 Repository layout
 
@@ -24,9 +25,13 @@ systems and infrastructure engineering.
 │   └── workflows/
 │       └── deploy.yml              # CI/CD — build and deploy the docs site
 ├── docs/                           # Markdown source for the published site
+│   ├── blog/                       # Blog posts and RSS configuration
+│   ├── stylesheets/                # Custom CSS for the UI
 │   ├── index.md                    # Home page
 │   ├── 01-environment-setup.md
 │   └── 02-documentation-as-code.md
+├── Dockerfile                      # Container definition for local dev
+├── compose.yaml                    # Docker Compose orchestration
 ├── mkdocs.yml                      # MkDocs configuration
 ├── requirements.txt                # Pinned Python dependencies
 └── README.md
@@ -34,39 +39,21 @@ systems and infrastructure engineering.
 
 ## 💻 Local development
 
-Requires Python 3.10+ and a Unix-like shell. Tested on WSL 2 (Ubuntu).
+Requires Docker and Docker Compose. Tested on Ubuntu Linux.
 
-Create a virtual environment outside the repo — keeps the project tree clean and
-avoids running Linux binaries from the Windows filesystem.
-
-```bash
-python3 -m venv ~/venvs/mkdocs-infra
-source ~/venvs/mkdocs-infra/bin/activate
-```
-
-Install pinned dependencies:
+To run the site locally with live reload:
 
 ```bash
-pip install -r requirements.txt
+docker compose up
 ```
 
-Serve locally with live reload:
+The site is available at `http://localhost:8000/infra-lab/`. Edits to files in `docs/` or `mkdocs.yml` trigger an automatic rebuild.
+
+To stop the container:
 
 ```bash
-mkdocs serve
+docker compose down
 ```
-
-The site is available at `http://127.0.0.1:8000/infra-lab/`.
-
-Build the static site into `./site/`:
-
-```bash
-mkdocs build --strict
-```
-
-`--strict` fails the build on any warning — broken internal links, missing nav
-entries, unknown anchors. CI runs the same command, so a clean local build is a
-clean pipeline build.
 
 ## 🚀 Deployment
 

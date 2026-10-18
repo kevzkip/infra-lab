@@ -1,105 +1,113 @@
-# Establishing an Isolated, CLI-Driven DevOps Workstation
+# Environment Setup
 
-## Architecture & Design Rationale
+This guide covers how to set up a fresh Linux environment to develop and run this documentation site. The setup assumes a Debian-based distribution (like Ubuntu) and uses Docker to ensure the environment is identical across all machines.
 
-To master DevOps, Site Reliability Engineering (SRE), and Cloud Engineering, maintaining a reproducible, isolated, and command-line-driven environment is paramount. This documentation logs the foundational architecture implemented to establish a clean separation between host operating system operations and engineering workflows.
+## 1. Prerequisites
 
-### Core Specifications
-
-* **Host Operating System:** Windows 11 (Configured on a dedicated local administrator account for total isolation from legacy software and personal user data).
-* **Storage Strategy:** Root workspace isolated on a dedicated secondary partition or directory structure (e.g., `~/DevOps-Journey` or a custom data drive) to optimize system performance and safeguard version-controlled artifacts.
-* **Terminal & Shell Engine:** Windows Terminal paired with PowerShell and native WSL 2 (Ubuntu distribution) for authentic Linux kernel virtualization.
-* **Package Management:** Command-line installation via `winget` (Windows) and `apt` (Linux).
-* **Version Control & Security:** Git version control backed by modern Ed25519 SSH cryptographic authentication.
-
----
-
-## Workstation Bootstrapping & Toolchain Deployment
-
-### 1. Package Management & Terminal Setup
-Core utilities are deployed using declarative command-line flags via `winget` to avoid bloated GUI installations:
-
-```powershell
-winget install --id Microsoft.WindowsTerminal -e --accept-source-agreements --accept-package-agreements
-winget install --id Git.Git -e --accept-source-agreements --accept-package-agreements
-winget install --id Microsoft.VisualStudioCode -e --accept-source-agreements --accept-package-agreements
-```
-
-### 2. Workspace Directory Structure
-The local repository is initialized within a clean workspace root, organized with subdirectories separating logs, configurations, and scripts:
-
-```powershell
-# Example generalized path initialization (adjust drive/folder to your preference)
-cd <your-preferred-storage-path>\DevOps-Journey
-git init
-mkdir docs, configs, scripts
-```
-
----
-
-## Cryptographic Authentication & SSH Configuration
-
-Secure communication with remote version control requires public-key cryptography. Because modern development workflows span both Windows PowerShell and the WSL 2 Linux environment, distinct Ed25519 key pairs are established for each runtime to simulate real-world hybrid infrastructure.
-
-### Windows PowerShell SSH Configuration
-```powershell
-Set-Service -Name ssh-agent -StartupType Automatic
-Start-Service -Name ssh-agent
-ssh-keygen -t ed25519 -C "your.email@example.com"
-ssh-add $env:USERPROFILE\.ssh\id_ed25519
-```
-
-### WSL 2 Ubuntu Linux SSH Configuration
-Inside the Ubuntu WSL environment, a native Linux SSH key pair mirrors production Linux server behavior:
-```bash
-ssh-keygen -t ed25519 -C "your.email@example.com"
-eval "$(ssh-agent -s)"
-ssh-add ~/.ssh/id_ed25519
-```
-
-To seamlessly export the public Linux key to the Windows clipboard for GitHub registration without text corruption:
-```bash
-cat ~/.ssh/id_ed25519.pub | clip.exe
-```
-
----
-
-## Guide: Creating and Linking Your Remote GitHub Repository
-
-Since this repository is managed locally from scratch, follow this precise procedure to establish your remote cloud backup and portfolio mirror on GitHub.
-
-### Phase 1: Creating the Repository on GitHub
-1. Open your web browser and navigate to [github.com](https://github.com). Log into your account.
-2. In the top-right corner of the interface, click the **`+`** icon and select **New repository**.
-3. Configure the repository parameters:
-   * **Repository name:** `DevOps-Journey`
-   * **Description:** *A step-by-step engineering log and artifact repository documenting my journey mastering DevOps, SRE, and Cloud Engineering.*
-   * **Visibility:** Select **Public** (ideal for portfolio sharing and blog rendering via Hashnode/DEV.to) or **Private**.
-   * **Important:** **Do NOT** check the boxes for "Add a README file", "Add .gitignore", or "Choose a license". Since your local repository is already initialized with local history and folder structures, adding remote boilerplate files will create conflicting histories.
-4. Click **Create repository**.
-
-### Phase 2: Linking Local Repository to Remote GitHub
-Once created, GitHub will display your repository URLs. Copy your repository's SSH URL (formatted as `git@github.com:<your-username>/DevOps-Journey.git`).
-
-Open your terminal inside your repository root (`DevOps-Journey`) and run the following commands to link your local history to the remote origin:
+You need a native Linux environment. If you are on a server or a Linux desktop, you are ready. Ensure your system is up to date:
 
 ```bash
-# Link remote origin URL
-git remote add origin git@github.com:<your-username>/DevOps-Journey.git
-
-# Ensure branch is designated as main
-git branch -M main
-
-# Stage, commit, and push your documentation logs
-git add .
-git commit -m "docs: initialize generalized workstation setup architecture"
-git push -u origin main
+sudo apt update && sudo apt upgrade -y
 ```
 
-### Verification
-Verify your remote connection status and sync state:
+## 2. Install Git
+
+Git is required to clone the repository and manage version control.
+
 ```bash
-git remote -v
-git status
+sudo apt install git -y
 ```
-The terminal should confirm that your local branch is successfully tracked and up to date with `origin/main`.
+
+Verify the installation:
+
+```bash
+git --version
+```
+
+Configure your identity so your commits are attributed correctly:
+
+```bash
+git config --global user.name "Your Name"
+git config --global user.email "your.email@example.com"
+```
+
+## 3. Install Docker Engine
+
+We use Docker to isolate the documentation dependencies and ensure the site builds exactly the same way in production (CI/CD) as it does locally.
+
+First, install the required prerequisites:
+
+```bash
+sudo apt install ca-certificates curl gnupg -y
+```
+
+Add Docker's official GPG key and repository:
+
+```bash
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  $(. /etc/os-release && echo "$VERSION_CODENAME") stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+```
+
+Update the package index and install Docker:
+
+```bash
+sudo apt update
+sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin -y
+```
+
+Allow your user to run Docker without `sudo` (you will need to log out and back in, or run `newgrp docker`):
+
+```bash
+sudo usermod -aG docker $USER
+```
+
+Verify Docker is running:
+
+```bash
+docker run hello-world
+```
+
+## 4. Clone the Repository
+
+Create a workspace directory and clone the project:
+
+```bash
+mkdir -p ~/projects
+cd ~/projects
+git clone git@github.com:kevzkip/infra-lab.git
+cd infra-lab
+```
+
+## 5. Start the Development Server
+
+The project includes a `compose.yaml` file which defines the local development environment. It uses a bind mount to sync your local files into the container, so live-reload works perfectly.
+
+Start the server:
+
+```bash
+docker compose up
+```
+
+The site is available at `http://localhost:8000/infra-lab/`. 
+
+To stop the server, press `Ctrl+C` in the terminal, then run:
+
+```bash
+docker compose down
+```
+
+## 6. Editor Configuration (Optional)
+
+For the best development experience, use an editor that supports language servers and integrated terminals. Visual Studio Code is recommended. 
+
+Because the code is on the native Linux filesystem, you can simply open the folder from the terminal:
+
+```bash
+code .
+```
