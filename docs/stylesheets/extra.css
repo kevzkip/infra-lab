@@ -1,27 +1,64 @@
-/* Deep violet/blue checkered grid background */
-body {
-    background-color: #0B0914; /* Very dark indigo/violet base */
-    background-image: 
-        linear-gradient(rgba(139, 92, 246, 0.07) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(139, 92, 246, 0.07) 1px, transparent 1px);
-    background-size: 30px 30px;
-    background-position: center center;
+/* =========================================
+   DARK MODE (Default)
+   ========================================= */
+[data-md-color-scheme="slate"] {
+    /* Backgrounds */
+    --md-default-bg-color: #0B0914; 
+    --md-default-bg-color--light: rgba(20, 16, 35, 0.8);
+    --md-default-bg-color--lighter: rgba(20, 16, 35, 0.6);
+    --md-default-bg-color--lightest: rgba(20, 16, 35, 0.4);
+
+    /* Text */
+    --md-default-fg-color: #f8fafc; 
+    --md-default-fg-color--light: #cbd5e1;
+    --md-default-fg-color--lighter: #94a3b8;
+    --md-default-fg-color--lightest: #64748b;
+
+    /* Accent (Deep Royal Blue) */
+    --md-primary-fg-color: #3b82f6;
+    --md-primary-fg-color--light: #60a5fa;
+    --md-primary-fg-color--dark: #2563eb;
+    --md-accent-fg-color: #3b82f6;
+    
+    /* Header and Borders */
+    --md-typeset-a-color: #3b82f6;
+    --md-typeset-color: #f8fafc;
 }
 
-/* Make the main content container slightly translucent so the grid shows through */
-.md-container {
-    background-color: rgba(11, 9, 20, 0.85);
+/* =========================================
+   LIGHT MODE
+   ========================================= */
+[data-md-color-scheme="default"] {
+    /* Backgrounds */
+    --md-default-bg-color: #f8fafc; 
+    --md-default-bg-color--light: #ffffff;
+    
+    /* Text */
+    --md-default-fg-color: #0f172a;
+    --md-default-fg-color--light: #334155;
+    
+    /* Accent (Slightly darker blue for contrast) */
+    --md-primary-fg-color: #2563eb;
+    --md-typeset-a-color: #2563eb;
+    --md-accent-fg-color: #2563eb;
 }
 
-/* Ensure the sidebar and header stay transparent */
-.md-sidebar, .md-header {
-    background-color: transparent !important;
+/* =========================================
+   SHARED OVERRIDES
+   ========================================= */
+/* Make the header solid instead of transparent */
+.md-header {
+    background-color: var(--md-primary-fg-color);
 }
 
-/* Give the text area a subtle violet-tinted dark background and border */
-.md-content {
-    background-color: rgba(20, 16, 35, 0.9);
-    padding: 1.5rem;
-    border-radius: 8px;
+/* Tweak the code block backgrounds to match our cards */
+[data-md-color-scheme="slate"] .md-typeset pre > code {
+    background-color: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(139, 92, 246, 0.2);
+}
+
+/* Optional: Style the cards on the home page if you use them */
+.md-typeset .grid.cards > ul > li {
+    background-color: var(--md-default-bg-color--light);
     border: 1px solid rgba(139, 92, 246, 0.2);
 }
